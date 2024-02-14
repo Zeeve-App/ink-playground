@@ -3,7 +3,7 @@ name: Ink_Version_Update
 on:
   workflow_dispatch:
   schedule:
-    - cron:  '0 6 35 * *'
+    - cron:  '40 6 * * *'
 
 jobs:
   get_versions:
