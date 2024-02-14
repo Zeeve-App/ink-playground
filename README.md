@@ -24,6 +24,9 @@ Features:
 - [Getting started](#getting-started)
 - [Detailed usage instructions:](#detailed-usage-instructions)
   - [The make file and ink! playground](#the-make-file-and-ink-playground)
+  - [Run Production service without dockerized image](#run-production-service-without-dockerized-image)
+  - [General usage](#general-usage)
+  - [Issues with running on remote server without HTTPS support](#issues-with-running-on-remote-server-without-https-support)
   - [crate-extractor](#crate-extractor)
 - [Overview of the (sub-)repos](#overview-of-the-sub-repos)
   - [The contributions of `crates`](#the-contributions-of-crates)
@@ -105,6 +108,61 @@ Important commands from the make file:
   Starts the Docker container of playground under the [sysbox](https://github.com/nestybox/sysbox) runtime. Make sure that you have the sysbox docker runtime installed on your computer. Instructions on how to install it can be found [here](https://github.com/nestybox/sysbox#installation).
 - `make ci` \
   With `make ci`, we run the majority of tests which we execute in our Github CI.
+
+## Run Production service without dockerized image
+
+- `make install`
+- `make generate`
+- `make build`
+- Pull compiler images: `make docker-pull-images`
+- Build production binary: `make backend-build-prod`
+- Run service: `make backend-run-release`
+  - To save the file to Gist then try to run with github token (you can create and use from `https://github.com/settings/tokens/new`): `GITHUB_GIST_TOKEN=<YOUR-TOKEN> make backend-run-release`
+
+## General usage
+
+- Open the URL based on where the server is hosted
+  - Rust analyzer will take a min. to load
+  - Default contract will be loaded, you can update with your code by copying from your source and pasting in the ink playground editor
+
+![Ink Playground](./assets/image.png)
+
+- Compile Contract
+  - Click on `Compile` to compile the contract
+  - Click on `Download` button once you compile the contract to download the compiled wasm output 
+
+![Compile Action](./assets/compile-1.png)
+![Compile Final](./assets/compile-2.png)
+
+- Format
+  - Click on `Format` to format the source in the editor
+
+![Format](./assets/format.png)
+
+- Test
+  - Click on `Test` to run tests in the source in the editor
+
+![test](./assets/test.png)
+
+- Versions
+  - Click on `Versions` to change the version to compile, format and test the source with the particular Ink version
+  - On clicking the version the the URL will change with version and the active version will have `Active` besides the version number in versions dropdown
+
+![Versions](./assets/versions.png)
+
+- Gist
+  - Click on the Share to save the source as gist
+  - Click on `Create New Github Gist`
+
+![Gist](./assets/gist.png)
+![Gist final](./assets/gist-final.png)
+
+## Issues with running on remote server without HTTPS support
+
+- Rust analyzer will not load due to browser policies around WASM
+  - The loading state will be stuck showing : **SYSTEM: Loading Rust Analyzer...**
+  - https://stackoverflow.com/questions/68567653/do-i-have-to-switch-to-https-to-use-sharedarraybuffer-in-chrome-92
+  - Solution: (run in local) or (setup https on remote server) or (proxy the port from remote server to local and open as localhost in browser)
 
 ### crate-extractor
 
