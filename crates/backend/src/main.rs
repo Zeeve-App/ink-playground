@@ -20,6 +20,7 @@ use crate::{
     services::{
         contract::{
             route_compile,
+            get_route_compile,
             route_format,
             route_status,
             route_test,
@@ -113,6 +114,10 @@ async fn main() -> std::io::Result<()> {
             .route(
                 "/compile",
                 post().to(|body| route_compile(COMPILE_SANDBOXED, body)),
+            )
+            .route(
+                "/compile/{version}",
+                get().to( |req| get_route_compile(COMPILE_SANDBOXED, req)),
             )
             .route(
                 "/test",

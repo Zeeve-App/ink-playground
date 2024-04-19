@@ -19,12 +19,16 @@
 //! strategy. This allows easy mocking.
 
 use actix_web::{
+    web,
     body::BoxBody,
     rt::task::spawn_blocking,
     web::Json,
+    HttpRequest,
     HttpResponse,
     Responder,
 };
+
+use serde::Deserialize;
 
 pub use sandbox::{
     CompilationRequest,
@@ -48,6 +52,15 @@ pub type TestingStrategy = fn(TestingRequest) -> sandbox::Result<TestingResult>;
 
 pub type FormattingStrategy = fn(FormattingRequest) -> sandbox::Result<FormattingResult>;
 
+// https://doc.rust-lang.org/rustdoc/write-documentation/the-doc-attribute.html#html_playground_url
+// edition not relevant here
+#[allow(dead_code)]
+#[derive(Debug, Deserialize)]
+pub struct CompileQueryParams {
+    code: String,
+    edition: String,
+}
+
 // -------------------------------------------------------------------------------------------------
 // IMPLEMENTATION
 // -------------------------------------------------------------------------------------------------
@@ -68,6 +81,33 @@ pub async fn route_compile(
         compile_strategy(CompilationRequest {
             source: req.source.to_string(),
             version: req.version.to_string(),
+        })
+    })
+    .await
+    .expect("Contract compilation panicked");
+
+    match compile_result {
+        Ok(result) => {
+            let compile_result = serde_json::to_string(&result).unwrap();
+            HttpResponse::Ok().body(compile_result)
+        }
+        Err(err) => {
+            eprintln!("{:?}", err);
+            HttpResponse::InternalServerError().finish()
+        }
+    }
+}
+
+pub async fn get_route_compile(
+    compile_strategy: CompileStrategy,
+    req: HttpRequest,
+) -> impl Responder {
+    let query_params = web::Query::<CompileQueryParams>::from_query(req.query_string()).unwrap();
+    let version: String = req.match_info().query("version").parse().unwrap();
+    let compile_result = spawn_blocking(move || {
+        compile_strategy(CompilationRequest {
+            source: query_params.code.to_string(),
+            version: version.to_string(),
         })
     })
     .await
